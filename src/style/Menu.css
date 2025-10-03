@@ -1,0 +1,9 @@
+.menu_container {
+    flex: 0 1 25vw; /* Takes exactly 20% of the viewport width */
+    background-color: #b8cee335;
+    border-right: 1px solid #e0e0e0;
+    padding: 0.2rem;
+    margin: 0 0.5rem 0 0;
+    box-sizing: border-box;
+    overflow-y: auto; /* Add scroll for long menus */
+}
