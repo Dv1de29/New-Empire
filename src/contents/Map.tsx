@@ -1,20 +1,21 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import '../style/Map.css';
+import { useMapSettings } from './SettingContext';
 
 interface MapProps{
 
 }
 
-const getMap = async (): Promise<string[][]> => {
+const getMap = async (mapName: string): Promise<string[][]> => {
     // return MP.europe.mapData.map(row => 
     //     row.map( cell => cell )
     // )
-    const response = await fetch("/resources/maps/europe.txt");
+    const response = await fetch(`/resources/maps/${mapName}.txt`);
 
     if (response.ok) {
         const textData = await response.text();
-        console.log(textData)
+        console.log(response.status)
         return textData.split('\n').map(row => Array.from(row));
     } else {
         throw new Error(`Failed to load map: ${response.status} ${response.statusText}`);
@@ -43,23 +44,31 @@ function Map({}: MapProps){
     const [ mapRow, setMapRow ] = useState<number>(0);
     const [ mapCol, setMapCol ] = useState<number>(0);
 
+    const { 
+        committedEmpires,
+        activeMap,
+    } = useMapSettings();
+
     const canvasRef = useRef<HTMLCanvasElement>(null)
 
     useEffect(() => {
         const fetchMap = async () => {
             try{
-                const data = await getMap();
+                console.time("FETCHMAP")
+                const data = await getMap(activeMap);
+                console.timeEnd("FETCHMAP")
                 setMapData(data)
                 setMapRow(data.length)
                 setMapCol(data[0].length)
-                console.log(data)
             } catch (error){
                 console.log("An error occured in loading map data", error)
                 setMapData([]);
             }
         }
+        console.timeEnd("USEEFFECT FETCHMAP")
         fetchMap()
-    }, []);
+        console.time("USEEFFECT FETCHMAP")
+    }, [activeMap]);
 
     const drawMap = useCallback(() => {
         const canvas = canvasRef.current;
@@ -82,9 +91,9 @@ function Map({}: MapProps){
                 ctx.fillStyle = color;
 
                 ctx.fillRect( col * tileW, row * tileH, tileW, tileH)
-                ctx.strokeStyle = 'rgba(34, 34, 34, 0.1)'; // Lighter grid line
-                ctx.lineWidth = 0.5;
-                ctx.strokeRect(col * tileW, row * tileH, tileW, tileH);
+                // ctx.strokeStyle = 'rgba(34, 34, 34, 0.1)'; // Lighter grid line
+                // ctx.lineWidth = 0.5;
+                // ctx.strokeRect(col * tileW, row * tileH, tileW, tileH);
             }
         }
     }, [MapData, mapRow, mapCol])
@@ -99,7 +108,9 @@ function Map({}: MapProps){
         const resizeCanvas = () => {
             canvas.width = container.clientWidth;
             canvas.height = container.clientHeight;
+            console.time("DrawMAP")
             drawMap();
+            console.timeEnd("DrawMAP")
         }
 
         resizeCanvas()
