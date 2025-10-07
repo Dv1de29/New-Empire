@@ -1,5 +1,5 @@
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import '../style/Map.css';
 import { useMapSettings } from './SettingContext';
 
@@ -13,7 +13,6 @@ const getMap = async (mapName: string): Promise<string[][]> => {
 
     if (response.ok) {
         const textData = await response.text();
-        console.log(response.status)
         return textData.split('\n').map(row => Array.from(row));
     } else {
         throw new Error(`Failed to load map: ${response.status} ${response.statusText}`);
@@ -38,30 +37,94 @@ const TerrainColors:{[key: string]: string; default: string} = {
 
 function Map(){
 
-    const [ MapData, setMapData ] = useState<string[][]>([]);
-    const [ mapRow, setMapRow ] = useState<number>(0);
-    const [ mapCol, setMapCol ] = useState<number>(0);
-
-    const [ ownershipData, setOwnershipData ] = useState<number[][]>([])
-
     const { 
         committedEmpires,
         activeEmpireId,
         activeMap,
     } = useMapSettings();
 
+    const [ MapData, setMapData ] = useState<string[][]>([]);
+    const [ mapRow, setMapRow ] = useState<number>(0);
+    const [ mapCol, setMapCol ] = useState<number>(0);
+    const [ ownershipData, setOwnershipData ] = useState<number[][]>([])
+
+
     const activeEmpire = committedEmpires.find(empire => empire.id === activeEmpireId)
 
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const canvasOwner = useRef<HTMLCanvasElement>(null)
 
+    const IdColor = useMemo(() => {
+        const maaaap = new globalThis.Map<number, string>();
+        committedEmpires.forEach(empire => {
+            maaaap.set(empire.id, empire.color)
+        })
+        return maaaap;
+    } ,[committedEmpires])
+
+    
+    
+    const drawMap = useCallback(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        
+        const ctx = canvas.getContext('2d')
+        if (!ctx) return;
+        
+        const { width: canvasW, height: canvasH} = canvas;
+        
+        const tileH = canvasH / mapRow;
+        const tileW = canvasW / mapCol;
+
+        ctx.clearRect(0,0, canvasW, canvasH)
+        
+        for( let row = 0; row < mapRow; row++ ){
+            for ( let col = 0; col < mapCol; col++ ){
+                const color = TerrainColors[MapData[row][col] as keyof typeof TerrainColors] || TerrainColors.default
+                
+                ctx.fillStyle = color;
+                
+                ctx.fillRect( col * tileW, row * tileH, tileW, tileH)
+                // ctx.strokeStyle = 'rgba(34, 34, 34, 0.1)'; // Lighter grid line
+                // ctx.lineWidth = 0.5;
+                // ctx.strokeRect(col * tileW, row * tileH, tileW, tileH);
+            }
+        }
+        
+        //// Drawing Ownership canvas
+        const ownerCanvas = canvasOwner.current;
+        if (!ownerCanvas) return
+        
+        const ctxOwner = ownerCanvas.getContext('2d')
+        if (!ctxOwner) return
+        
+        ctxOwner.clearRect(0,0, canvasW, canvasH)
+
+        console.log(ownershipData)
+        
+        
+        
+        // for (let row = 0; row < mapRow; row++ ){
+        //     for (let col = 0; col <= mapCol; col++ ){
+        //         if ( ownershipData[row][col] === 0 ){
+        //             continue
+        //         }
+        //         const color = IdColor.get(ownershipData[row][col])
+        //         if ( !color ) return
+    
+        //         ctxOwner.fillStyle = color
+        //         ctxOwner.fillRect( col * tileW, row * tileH, tileW, tileH)
+        //     }
+        // }
+        
+        
+    }, [MapData, mapRow, mapCol, ownershipData, IdColor])
+
     ///fecth map
     useEffect(() => {
         const fetchMap = async () => {
             try{
-                console.time("FETCHMAP")
                 const data = await getMap(activeMap);
-                console.timeEnd("FETCHMAP")
                 setMapData(data)
                 setMapRow(data.length)
                 setMapCol(data[0].length)
@@ -70,70 +133,11 @@ function Map(){
                 setMapData([]);
             }
         }
-        console.timeEnd("USEEFFECT FETCHMAP")
         fetchMap()
-        console.time("USEEFFECT FETCHMAP")
-    }, [activeMap]);
 
-    const drawMap = useCallback(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-
-        const ctx = canvas.getContext('2d')
-        if (!ctx) return;
-
-        const { width: canvasW, height: canvasH} = canvas;
         
-        const tileH = canvasH / mapRow;
-        const tileW = canvasW / mapCol;
-
-        ctx.clearRect(0,0, canvasW, canvasH)
-
-        for( let row = 0; row < mapRow; row++ ){
-            for ( let col = 0; col < mapCol; col++ ){
-                const color = TerrainColors[MapData[row][col] as keyof typeof TerrainColors] || TerrainColors.default
-
-                ctx.fillStyle = color;
-
-                ctx.fillRect( col * tileW, row * tileH, tileW, tileH)
-                // ctx.strokeStyle = 'rgba(34, 34, 34, 0.1)'; // Lighter grid line
-                // ctx.lineWidth = 0.5;
-                // ctx.strokeRect(col * tileW, row * tileH, tileW, tileH);
-            }
-        }
-
-        //// Drawing Ownership canvas
-        const ownerCanvas = canvasOwner.current;
-        if (!ownerCanvas) return
-
-        const ctxOwner = ownerCanvas.getContext('2d')
-        if (!ctxOwner) return
-
-        ctxOwner.clearRect(0,0, canvasW, canvasH)
-
-        //// making empire: color dict
-        // const IdColor = new Map<number, string>()
-
-        // for (let row = 0; row < mapRow; row++ ){
-        //     for (let col = 0; col <= mapCol; col++ ){
-        //         if ( ownershipData[row][col] === 0 ){
-        //             continue
-        //         }
-        //         const color = 
-        //     }
-        // }
-
-
-        //// seting ownershipMap data
-        if ( mapRow > 0 && mapCol > 0){
-            const initialOwnership = Array.from({ length: mapRow}, () => {
-                return Array.from({length: mapCol}, () => 0)
-            })
-            setOwnershipData(initialOwnership)
-        }
-
-    }, [MapData, mapRow, mapCol])
-
+    }, [activeMap]);
+    
     // resize canvas
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -145,9 +149,7 @@ function Map(){
         const resizeCanvas = () => {
             canvas.width = container.clientWidth;
             canvas.height = container.clientHeight;
-            console.time("DrawMAP")
             drawMap();
-            console.timeEnd("DrawMAP")
         }
 
         resizeCanvas()
@@ -160,9 +162,22 @@ function Map(){
 
     }, [drawMap])
 
+    //// setting ownership data to 0
+    useEffect(() => {
+        if ( mapRow > 0 && mapCol > 0){
+            const initialOwnership = Array.from({ length: mapRow}, () => {
+                return Array.from({length: mapCol}, () => 0)
+            })
+            setOwnershipData(initialOwnership)
+        }
+    }, [MapData, mapRow, mapCol])
+
     const handleMapClick = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
         let canvas = canvasRef.current;
-        if (!canvas) return
+        if (!canvas){
+            console.log("CANVAS NOT FOUND")
+            return
+        }
 
         const rect = canvas.getBoundingClientRect();
 
@@ -186,6 +201,7 @@ function Map(){
 
         setOwnershipData(prevOwner => {
             prevOwner[mapGridX][mapGridY] = activeEmpireId
+            console.log(prevOwner)
             return prevOwner
         })
 
