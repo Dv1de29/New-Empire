@@ -12,12 +12,8 @@ function App() {
         <header className="App-header">
         </header>
         <main>
-          <Menu>
-
-          </Menu>
-          <Map>
-
-          </Map>
+          <Menu />
+          <Map />
         </main>
       </div>
     </SettingsProvider>

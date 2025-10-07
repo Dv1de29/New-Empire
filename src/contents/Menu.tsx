@@ -6,24 +6,22 @@ import MenuMapSelect from './MenuMapSelect';
 
 import { useMenuSettings, CountrySliderValues } from './SettingContext';
 
-interface MenuProps{
-
-}
 
 
-function Menu({}: MenuProps){
+function Menu(){
 
     const { 
         draftEmpires,
         activeEmpireId,    
-        updateDraftSetting, 
-        setActiveEmpireId, 
-        addEmpire,
-        commitSettings,   
+        // updateDraftSetting,
+        // updateEmpireName,
+        // updateEmpireColor, 
+        // setActiveEmpireId, 
+        // addEmpire,
+        // commitSettings,   
     } = useMenuSettings();
 
     const activeEmpire = draftEmpires.find(empire => empire.id === activeEmpireId)
-    const sliderKeys: (keyof CountrySliderValues)[] = activeEmpire ? Object.keys(activeEmpire.settings) as (keyof CountrySliderValues)[] : [];
 
     return (
         <>

@@ -3,10 +3,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import '../style/Map.css';
 import { useMapSettings } from './SettingContext';
 
-interface MapProps{
 
-}
-
+///actual fetch
 const getMap = async (mapName: string): Promise<string[][]> => {
     // return MP.europe.mapData.map(row => 
     //     row.map( cell => cell )
@@ -38,19 +36,26 @@ const TerrainColors:{[key: string]: string; default: string} = {
 }
 
 
-function Map({}: MapProps){
+function Map(){
 
     const [ MapData, setMapData ] = useState<string[][]>([]);
     const [ mapRow, setMapRow ] = useState<number>(0);
     const [ mapCol, setMapCol ] = useState<number>(0);
 
+    const [ ownershipData, setOwnershipData ] = useState<number[][]>([])
+
     const { 
         committedEmpires,
+        activeEmpireId,
         activeMap,
     } = useMapSettings();
 
-    const canvasRef = useRef<HTMLCanvasElement>(null)
+    const activeEmpire = committedEmpires.find(empire => empire.id === activeEmpireId)
 
+    const canvasRef = useRef<HTMLCanvasElement>(null)
+    const canvasOwner = useRef<HTMLCanvasElement>(null)
+
+    ///fecth map
     useEffect(() => {
         const fetchMap = async () => {
             try{
@@ -96,8 +101,40 @@ function Map({}: MapProps){
                 // ctx.strokeRect(col * tileW, row * tileH, tileW, tileH);
             }
         }
+
+        //// Drawing Ownership canvas
+        const ownerCanvas = canvasOwner.current;
+        if (!ownerCanvas) return
+
+        const ctxOwner = ownerCanvas.getContext('2d')
+        if (!ctxOwner) return
+
+        ctxOwner.clearRect(0,0, canvasW, canvasH)
+
+        //// making empire: color dict
+        // const IdColor = new Map<number, string>()
+
+        // for (let row = 0; row < mapRow; row++ ){
+        //     for (let col = 0; col <= mapCol; col++ ){
+        //         if ( ownershipData[row][col] === 0 ){
+        //             continue
+        //         }
+        //         const color = 
+        //     }
+        // }
+
+
+        //// seting ownershipMap data
+        if ( mapRow > 0 && mapCol > 0){
+            const initialOwnership = Array.from({ length: mapRow}, () => {
+                return Array.from({length: mapCol}, () => 0)
+            })
+            setOwnershipData(initialOwnership)
+        }
+
     }, [MapData, mapRow, mapCol])
 
+    // resize canvas
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -123,6 +160,37 @@ function Map({}: MapProps){
 
     }, [drawMap])
 
+    const handleMapClick = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
+        let canvas = canvasRef.current;
+        if (!canvas) return
+
+        const rect = canvas.getBoundingClientRect();
+
+        const x = event.clientX - rect.left
+        const y = event.clientY - rect.top
+
+        const canvasX = x * (canvas.width / rect.width);
+        const canvasY = y * (canvas.height / rect.height);
+
+        // console.log(`Canvas Coordinates: (${canvasX}, ${canvasY})`);
+
+        const { width: canvasW, height: canvasH} = canvas;
+        
+        const tileH = canvasH / mapRow;
+        const tileW = canvasW / mapCol;
+
+        const mapGridX = Math.floor(canvasX / tileW);
+        const mapGridY = Math.floor(canvasY / tileH);
+
+        console.log(mapGridX, mapGridY)
+
+        setOwnershipData(prevOwner => {
+            prevOwner[mapGridX][mapGridY] = activeEmpireId
+            return prevOwner
+        })
+
+    }, [mapRow, mapCol, activeEmpireId])
+
     return (
         <>
             <div className="map_container">
@@ -133,6 +201,12 @@ function Map({}: MapProps){
                     <canvas 
                         className="map_canvas"
                         ref={canvasRef}
+                        style={{ display: 'block', width: '100%', height: '100%' }}
+                        onClick={handleMapClick}
+                    />
+                    <canvas 
+                        className='owner_canvas'
+                        ref={canvasOwner}
                         style={{ display: 'block', width: '100%', height: '100%' }}
                     />
                 </div>

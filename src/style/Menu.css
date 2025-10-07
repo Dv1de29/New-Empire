@@ -68,6 +68,7 @@
     gap: 10px;
     padding: 1rem 0.5rem;
     border-radius: 5px 5px 0 0;
+    overflow: hidden;
 }
 
 .empire_box{
@@ -86,4 +87,33 @@
 .empire_settings{
     padding: 0rem 0.5rem;
     border-radius: 0 0 5px 5px;
+}
+
+.empire_details{
+    overflow: hidden;
+    width: 90%;
+    margin-bottom: 10px;
+}
+
+.buttons_section{
+    display: flex;
+    flex-flow: row;
+    gap: 0.25rem;
+    align-items: center;
+    justify-content: center;
+    /* margin-bottom: 0.5rem; */
+    background-color: #b8cee335;
+}
+
+.buttons_section > button{
+    width: 40%;
+    aspect-ratio: 3 / 2;
+    border-radius: 15px;
+    background-color: red;
+    color: white;
+    font-size : 10px;
+}
+
+.buttons_section .add_button{
+    background-color: green;
 }

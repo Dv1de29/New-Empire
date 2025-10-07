@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CountrySlider from "./CountrySlider";
 
 import { useMenuSettings } from "./SettingContext";
@@ -8,14 +8,25 @@ function MenuEmpires(){
         draftEmpires,
         activeEmpireId,    
         updateDraftSetting, 
+        updateEmpireName,
+        updateEmpireColor,
         setActiveEmpireId, 
         addEmpire,
+        deleteEmpire,
         commitSettings,   
     } = useMenuSettings();
 
     const activeEmpire = draftEmpires.find(empire => empire.id === activeEmpireId)
 
     const [ expandList, setExpandList ] = useState<boolean>(false)
+    const [ empireNameInput, setEmpireNameInput ] = useState<string>('')
+
+    useEffect(() => {
+        setEmpireNameInput(activeEmpire ? activeEmpire.name : '')
+    }, [activeEmpire])
+
+    //// for automatization of CountrySlider
+    // const sliderKeys: (keyof CountrySliderValues)[] = activeEmpire ? Object.keys(activeEmpire.settings) as (keyof CountrySliderValues)[] : [];
 
     return(
         <>
@@ -33,19 +44,21 @@ function MenuEmpires(){
                      {draftEmpires.map(empire => (
                         <div
                             className="empire_box"
+                            key={empire.id}
                             style={(empire.id === activeEmpireId) ? {backgroundColor: 'green'} : {backgroundColor: '#051d3485'}}
-                            onClick={() => {
+                            onClick={(e) => {
                                 setActiveEmpireId(empire.id)
+                                e.stopPropagation()
                             }}
                             >
-                            <span>{empire.name}</span>
+                            <span>{`${empire.name}`}</span>
                         </div>
                      ))}
                 </div>
                 <div className="empire_settings">
                     { activeEmpire && (
                     <>
-                    <div className="empire_name">{activeEmpire.name}</div>
+                    <div className="empire_name">{`${activeEmpire.name} settings:`}</div>
                     <div className="empire_sliders">
                         <CountrySlider 
                             value={activeEmpire.settings.water}
@@ -87,17 +100,44 @@ function MenuEmpires(){
                         <input 
                             type="text"
                             id="name_input"
-                            value={activeEmpire.name} 
+                            value={empireNameInput}
+                            onChange={(e) => {
+                                setEmpireNameInput(e.target.value)
+                            }}
+                            onBlur={(e) => {
+                                updateEmpireName(activeEmpireId, empireNameInput)
+                            }} 
                         />
                         <input 
                             type="color" 
                             name="color_input" 
                             id="color_input" 
+                            value={activeEmpire.color}
+                            onChange={(e) =>{
+                                updateEmpireColor(activeEmpireId, e.target.value)
+                            }}
                         />
                     </div>
+                    
                     </>
                     )}
                 </div>
+            </div>
+            <div className="buttons_section">
+                <button
+                    className="add_button"
+                    onClick={addEmpire}
+                >
+                    {"Add empire"}
+                </button>
+                <button
+                    className="delete_button"
+                    onClick={() => {
+                        deleteEmpire(activeEmpireId)
+                    }}
+                >
+                    {"Delete empire"}
+                </button>
             </div>
         </>
     )

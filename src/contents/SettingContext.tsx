@@ -15,6 +15,7 @@ export interface CountrySliderValues{
 export interface EmpireConfig{
     id: number,
     name: string,
+    color: string,
     settings: CountrySliderValues,
 }
 
@@ -27,8 +28,11 @@ export interface SettingsContextType{
     activeMap: string,      
 
     updateDraftSetting: (empireID: number, key: keyof CountrySliderValues, value: number) => void;
+    updateEmpireName: (empireID: number, value: string) => void;
+    updateEmpireColor: (empireID: number, value: string) => void
     setActiveEmpireID: (id: number) => void;
     addEmpire: () => void;
+    deleteEmpire: (id: number) => void
     setActiveMap: (mapName: string) => void;
 
     commitSettings: () => void;
@@ -45,8 +49,9 @@ export const initialEmpireConfig: CountrySliderValues = {
 }
 
 export const initialEmpires: EmpireConfig[] = [
-    { id: 1, name: "Emmpire1 Miau", settings: initialEmpireConfig},
-    { id: 2, name: "Empire2 Ben", settings: {...initialEmpireConfig, mountain: 8}}
+    { id: 1, name: "Emmpire1 Miau", color: '#F965B9', settings: initialEmpireConfig},
+    { id: 2, name: "Empire2 Ben", color: '#B51121', settings: {...initialEmpireConfig, mountain: 5}},
+    { id: 3, name: "Empire2 Ottttter", color: '#25F9F9', settings: {...initialEmpireConfig, river: 1}}
 ]
 
 export const initialContext: SettingsContextType = {
@@ -56,8 +61,11 @@ export const initialContext: SettingsContextType = {
     activeMap: "world",
 
     updateDraftSetting: () => {},
+    updateEmpireName: () => {},
+    updateEmpireColor: () => {},
     setActiveEmpireID: () => {},
     addEmpire: () => {},
+    deleteEmpire: () => {},
     setActiveMap: () => {},
 
     commitSettings: () => {},
@@ -70,6 +78,7 @@ export const useMapSettings = () => {
 
     return { 
         committedEmpires: context.committedEmpires,
+        activeEmpireId: context.activeEmpireId,
         activeMap: context.activeMap,
     } 
 }
@@ -88,9 +97,12 @@ export const useMenuSettings = () => {
     return {
         draftEmpires: context.draftEmpires, 
         activeEmpireId: context.activeEmpireId,
-        updateDraftSetting: context.updateDraftSetting, 
+        updateDraftSetting: context.updateDraftSetting,
+        updateEmpireName: context.updateEmpireName,
+        updateEmpireColor: context.updateEmpireColor, 
         setActiveEmpireId: context.setActiveEmpireID,
         addEmpire: context.addEmpire,
+        deleteEmpire: context.deleteEmpire,
         commitSettings: context.commitSettings
     }
 }
@@ -127,17 +139,49 @@ export const SettingsProvider = ({ children }: SettingsProviderProps ) => {
         }))
     }, [])
 
+    const updateEmpireName = useCallback((id: number, name: string) => {
+        setDraftEmpires(prevEmpires => prevEmpires.map(empire => {
+            if ( empire.id === id ){
+                return {
+                    ...empire,
+                    name: name,
+                }
+            }
+            return empire
+        }))
+    }, [])
+
+    const updateEmpireColor = useCallback((id: number, color: string) => {
+        setDraftEmpires(prevEmpires => prevEmpires.map(empire => {
+            if ( empire.id === id ){
+                return {
+                    ...empire,
+                    color: color,
+                }
+            }
+            return empire
+        }))
+    }, [])
+
     const addEmpire = useCallback(() => {
         const newID = draftEmpires.length + 1
+        const newColor = Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, '0')
         const newEmpire = {
             id: newID,
             name: `Empire${newID} Miau`,
+            color: `#${newColor.toUpperCase()}`,
             settings: initialEmpireConfig,
         }
 
         setDraftEmpires(prevEmpires => [...prevEmpires, newEmpire])
         setActiveEmpireID(newID)
     }, [draftEmpires])
+
+    const deleteEmpire = useCallback((id: number) => {
+        setDraftEmpires(prevEmpires => 
+            prevEmpires.filter(empire => empire.id !== id)
+        )
+    }, [])
 
     const commitSettings = useCallback(() =>{
         setCommittedEmpires(draftEmpires) 
@@ -149,11 +193,14 @@ export const SettingsProvider = ({ children }: SettingsProviderProps ) => {
         activeEmpireId: activeEmpireID,
         activeMap,
         updateDraftSetting,
+        updateEmpireName,
+        updateEmpireColor,
         setActiveEmpireID,
         addEmpire,
+        deleteEmpire,
         setActiveMap,
         commitSettings,
-    }), [draftEmpires, committedEmpires, activeEmpireID, activeMap, updateDraftSetting, addEmpire, setActiveMap, commitSettings])
+    }), [draftEmpires, committedEmpires, activeEmpireID, activeMap, updateDraftSetting, updateEmpireName, updateEmpireColor, addEmpire, deleteEmpire, setActiveMap, commitSettings])
 
     return (
         <SettingsContext.Provider value={contextValue}>
