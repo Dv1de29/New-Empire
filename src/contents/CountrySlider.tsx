@@ -28,7 +28,7 @@ function CountrySlider({
                         type="range"
                         id="styledSlider"
                         className="styled-slider"
-                        min={1}
+                        min={label !== "size" ? 1 : 100}
                         max={label !== "size" ? 10 : 10000}
                         step={label === "size" ? 1 : 0.1}
                         value={value}

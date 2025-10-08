@@ -220,12 +220,30 @@ class MaxHeap {
   }
 }
 
+interface PenaltyConfiguration{
+  water_land: number,
+  land_water: number,
+  mountain: number,
+  forest: number,
+  desert: number,
+  ice: number, 
+}
+
+const defaultPenaltyConfig = {
+  water_land: 5,
+  land_water: 10,
+  mountain: 3,
+  forest: 2,
+  desert: 4,
+  ice: 1, 
+}
+
 
 export function searchTer(
     terrainMap: string[][],
     startPoint: Point,
     costs: TerrainCosts,
-    terrainChangePenalty: number = 0,
+    terrainChangePenalty: PenaltyConfiguration = defaultPenaltyConfig,
 ): Map<string, number>{
     const rows = terrainMap.length;
     const cols = terrainMap[0].length;
@@ -273,8 +291,27 @@ export function searchTer(
 
             let penalty = 0
 
-            if ( currentCellType != neibType ){
-                penalty += terrainChangePenalty
+            if ( ["W", "R"].includes(currentCellType) && !["W", "R"].includes(neibType) ){
+              penalty += terrainChangePenalty.water_land
+            }
+
+            if ( !["W", "R"].includes(currentCellType) && ["W", "R"].includes(neibType) ){
+              penalty += terrainChangePenalty.land_water
+            }
+
+            switch(neibType){
+              case "M":
+                penalty += terrainChangePenalty.mountain
+                break;
+              case "F":
+                penalty += terrainChangePenalty.forest
+                break;
+              case "D":
+                penalty += terrainChangePenalty.desert
+                break;
+              case "I":
+                penalty += terrainChangePenalty.ice;
+                break;
             }
 
             const newCost = currentCost + travelCost + penalty

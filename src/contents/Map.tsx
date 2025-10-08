@@ -6,6 +6,12 @@ import { useMapSettings } from './SettingContext';
 import { searchTer, findNClosestCells } from '../resources/mapLgorithm';
 
 
+type Owner_Value = {
+    owner: number,
+    cost: number,
+}
+
+
 ///actual fetch
 const getMap = async (mapName: string): Promise<string[][]> => {
     // return MP.europe.mapData.map(row => 
@@ -38,7 +44,6 @@ const TerrainColors:{[key: string]: string; default: string} = {
 
 
 
-// REZOLVE COMMITED EMPIRES BECAUSE NOW IT ONLY CHANGES THE DRAFTEMPIRES AND THE COMMITEDEMPIRES IS ALWAYS THE INTITIAL SETUP
 
 
 // !!!!!!!!!!!!!!!!
@@ -60,7 +65,7 @@ function Map(){
     const [ MapData, setMapData ] = useState<string[][]>([]);
     const [ mapRow, setMapRow ] = useState<number>(0);
     const [ mapCol, setMapCol ] = useState<number>(0);
-    const [ ownershipData, setOwnershipData ] = useState<number[][]>([])
+    const [ ownershipData, setOwnershipData ] = useState<Owner_Value[][]>([])
     const [ capitalLocations, setCapitalLocations ] = useState<Map<number, [number, number]>>(new globalThis.Map())
 
     const activeEmpire = committedEmpires.find(empire => empire.id === activeEmpireId)
@@ -131,7 +136,7 @@ function Map(){
     useEffect(() => {
         if ( mapRow > 0 && mapCol > 0){
             const initialOwnership = Array.from({ length: mapRow}, () => {
-                return Array.from({length: mapCol}, () => 0)
+                return Array.from({length: mapCol}, () => ({ owner: 0, cost: Infinity}))
             })
             setOwnershipData(initialOwnership)
         }
@@ -191,7 +196,7 @@ function Map(){
 
         for (let row = 0; row < mapRow; row++ ){
             for (let col = 0; col < mapCol; col++ ){
-                const ownerId = ownershipData[row][col];
+                const ownerId = ownershipData[row][col].owner;
                 if ( ownerId === 0 ){
                     continue;
                 }
@@ -286,7 +291,12 @@ function Map(){
             console.log(pointsCountry)
 
             pointsCountry.forEach(cell => {
-                newOwner[cell.point.row][cell.point.col] = activeEmpireId
+                const currentCls = newOwner[cell.point.row][cell.point.col].cost
+
+                if ( cell.cost < currentCls ){
+                    newOwner[cell.point.row][cell.point.col].owner = activeEmpireId
+                    newOwner[cell.point.row][cell.point.col].cost = cell.cost
+                }
             })
             
             // newOwner[mapGridY][mapGridX] = activeEmpireId
