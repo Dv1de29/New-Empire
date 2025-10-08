@@ -21,7 +21,7 @@ function CountrySlider({
         <>
             <div className="slider-container">
                 <label htmlFor="styledSlider" className="slider-label">
-                    {`${label} cost:`}
+                    {label === "size" ? `${label}:` : `${label} cost:`}
                 </label>
                 <div className="slid">
                     <input
@@ -29,8 +29,8 @@ function CountrySlider({
                         id="styledSlider"
                         className="styled-slider"
                         min={1}
-                        max={10}
-                        step={0.1}
+                        max={label !== "size" ? 10 : 10000}
+                        step={label === "size" ? 1 : 0.1}
                         value={value}
                         onChange={handleSliderChange}
                     />

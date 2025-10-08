@@ -10,6 +10,7 @@ export interface CountrySliderValues{
     desert : number,
     forest : number,
     ice : number,
+    size: number,
 }
 
 export interface EmpireConfig{
@@ -46,12 +47,13 @@ export const initialEmpireConfig: CountrySliderValues = {
     desert : 4.0,
     forest : 3.0,
     ice : 7.0,
+    size: 1000,
 }
 
 export const initialEmpires: EmpireConfig[] = [
-    { id: 1, name: "Emmpire1 Miau", color: '#F965B9', settings: initialEmpireConfig},
+    { id: 1, name: "Empire1 Cat", color: '#F965B9', settings: initialEmpireConfig},
     { id: 2, name: "Empire2 Ben", color: '#B51121', settings: {...initialEmpireConfig, mountain: 5}},
-    { id: 3, name: "Empire2 Ottttter", color: '#25F9F9', settings: {...initialEmpireConfig, river: 1}}
+    { id: 3, name: "Empire2 Otter", color: '#25F9F9', settings: {...initialEmpireConfig, river: 1}}
 ]
 
 export const initialContext: SettingsContextType = {
@@ -123,7 +125,7 @@ export const SettingsProvider = ({ children }: SettingsProviderProps ) => {
     const [ activeMap, setActiveMap ] = useState<string>("world");
 
     const updateDraftSetting = useCallback((id: number, key: keyof CountrySliderValues, value: number) => {
-        const auxValue = Math.min(100, Math.max(1, value))
+        // const auxValue = Math.min(100, Math.max(1, value))
 
         setDraftEmpires(prevEmpires => prevEmpires.map(empire => {
             if ( empire.id === id){
@@ -131,7 +133,7 @@ export const SettingsProvider = ({ children }: SettingsProviderProps ) => {
                     ...empire,
                     settings: {
                         ...empire.settings,
-                        [key]: auxValue,
+                        [key]: value,
                     }
                 }
             }

@@ -4,7 +4,7 @@ import '../style/Menu.css'
 import MenuEmpires from './MenuEmpires';
 import MenuMapSelect from './MenuMapSelect';
 
-import { useMenuSettings, CountrySliderValues } from './SettingContext';
+import { useMenuSettings } from './SettingContext';
 
 
 

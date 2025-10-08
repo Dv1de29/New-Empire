@@ -48,6 +48,7 @@ function MenuEmpires(){
                             style={(empire.id === activeEmpireId) ? {backgroundColor: 'green'} : {backgroundColor: '#051d3485'}}
                             onClick={(e) => {
                                 setActiveEmpireId(empire.id)
+                                commitSettings()
                                 e.stopPropagation()
                             }}
                             >
@@ -94,6 +95,11 @@ function MenuEmpires(){
                             value={activeEmpire.settings.ice}
                             setValue={(newValue: number) => {updateDraftSetting(activeEmpireId, "ice", newValue)}}
                             label={"ice"}
+                        />
+                        <CountrySlider 
+                            value={activeEmpire.settings.size}
+                            setValue={(newValue: number) => {updateDraftSetting(activeEmpireId, "size", newValue)}}
+                            label={"size"}
                         />
                     </div>
                     <div className="empire_details">
