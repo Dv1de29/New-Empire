@@ -47,7 +47,7 @@ export const initialEmpireConfig: CountrySliderValues = {
     desert : 4.0,
     forest : 3.0,
     ice : 7.0,
-    size: 1000,
+    size: 2000,
 }
 
 export const initialEmpires: EmpireConfig[] = [
@@ -175,7 +175,10 @@ export const SettingsProvider = ({ children }: SettingsProviderProps ) => {
             settings: initialEmpireConfig,
         }
 
-        setDraftEmpires(prevEmpires => [...prevEmpires, newEmpire])
+        const newEmpires = [...draftEmpires, newEmpire]
+
+        setDraftEmpires(newEmpires)
+        setCommittedEmpires(newEmpires)
         setActiveEmpireID(newID)
     }, [draftEmpires])
 

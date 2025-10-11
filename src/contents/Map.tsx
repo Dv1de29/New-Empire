@@ -43,7 +43,15 @@ const TerrainColors:{[key: string]: string; default: string} = {
 }
 
 
-
+const debounce = (func: Function, delay: number) => {
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    return (...args: any[]) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            func.apply(null, args);
+        }, delay);
+    };
+};
 
 
 // !!!!!!!!!!!!!!!!
@@ -80,33 +88,6 @@ function Map(){
         })
         return maaaap;
     } ,[committedEmpires])
-
-    // resize canvas
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        const ownerCanvas = canvasOwner.current;
-        if (!canvas || !ownerCanvas) return;
-
-        const container = canvas.parentElement;
-        if (!container) return;
-
-        const resizeCanvas = () => {
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight;
-
-            ownerCanvas.width = container.clientWidth;
-            ownerCanvas.height = container.clientHeight;
-        }
-
-        resizeCanvas()
-
-        window.addEventListener('resize', resizeCanvas);
-
-        return () => {
-            window.removeEventListener('resize', resizeCanvas);
-        };
-
-    }, [])
 
      ///fecth map
     useEffect(() => {
@@ -209,7 +190,26 @@ function Map(){
             }
         }
 
-    }, [ownershipData, IdColor, mapRow, mapCol])
+        ctxOwner.globalAlpha = 1.0;
+        ctxOwner.fillStyle = '#000000'; 
+        const dotRadius = Math.min(tileW, tileH) * 1;
+
+        capitalLocations.forEach((coords: [number, number], empireId: number) => {
+        const [row, col] = coords;
+        
+        const centerX = col * tileW + tileW / 2;
+        const centerY = row * tileH + tileH / 2;
+        
+        ctxOwner.beginPath();
+        ctxOwner.arc(centerX, centerY, dotRadius, 0, Math.PI * 2);
+        ctxOwner.fill();
+        
+        ctxOwner.strokeStyle = '#FFFFFF'; 
+        ctxOwner.lineWidth = 1;
+        ctxOwner.stroke();
+    });
+
+    }, [ownershipData, IdColor, mapRow, mapCol, capitalLocations])
 
     //// redraw map when needed
     useEffect(() => {
@@ -224,6 +224,38 @@ function Map(){
             ownerDrawMap()
         }
     }, [ownershipData, ownerDrawMap, mapCol, mapRow])
+
+    // resize canvas
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        const ownerCanvas = canvasOwner.current;
+        if (!canvas || !ownerCanvas) return;
+
+        const container = canvas.parentElement;
+        if (!container) return;
+
+        const resizeCanvas = () => {
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+
+            ownerCanvas.width = container.clientWidth;
+            ownerCanvas.height = container.clientHeight;
+
+            drawMap();
+            ownerDrawMap();
+        }
+
+        resizeCanvas()
+
+        const debouncedResize = debounce(resizeCanvas, 150)
+
+        window.addEventListener('resize', debouncedResize);
+
+        return () => {
+            window.removeEventListener('resize', debouncedResize);
+        };
+
+    }, [drawMap, ownerDrawMap])
 
     const handleMapClick = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
 
@@ -304,7 +336,7 @@ function Map(){
             return newOwner
         })
 
-    }, [mapRow, mapCol, activeEmpireId, capitalLocations, MapData])
+    }, [mapRow, mapCol, activeEmpireId, activeEmpire, capitalLocations, MapData])
 
     return (
         <>
