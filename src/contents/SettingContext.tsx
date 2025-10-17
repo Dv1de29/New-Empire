@@ -40,15 +40,27 @@ export interface SettingsContextType{
 }
 
 export const initialEmpireConfig: CountrySliderValues = {
-    water : 1.0,
+    water : 2.0,
     river : 1.5,
-    plain : 2.0,
-    mountain : 6.0,
-    desert : 4.0,
-    forest : 3.0,
-    ice : 7.0,
-    size: 2000,
+    plain : 1.0,
+    mountain : 5.0,
+    desert : 5.5,
+    forest : 2.5,
+    ice : 8.0,
+    size: 10000,
 }
+
+
+// export const initialEmpireConfig: CountrySliderValues = {
+//     water : 1.0,
+//     river : 1.5,
+//     plain : 2.0,
+//     mountain : 6.0,
+//     desert : 4.0,
+//     forest : 3.0,
+//     ice : 7.0,
+//     size: 2000,
+// }
 
 export const initialEmpires: EmpireConfig[] = [
     { id: 1, name: "Empire1 Cat", color: '#F965B9', settings: initialEmpireConfig},
@@ -170,7 +182,7 @@ export const SettingsProvider = ({ children }: SettingsProviderProps ) => {
         const newColor = Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, '0')
         const newEmpire = {
             id: newID,
-            name: `Empire${newID} Miau`,
+            name: `Empire${newID}`,
             color: `#${newColor.toUpperCase()}`,
             settings: initialEmpireConfig,
         }

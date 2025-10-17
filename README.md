@@ -1,46 +1,62 @@
-# Getting Started with Create React App
+# Map Project — Territorial Expansion Simulator
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A React + TypeScript app that simulates territorial expansion of configurable "empires" over .txt maps. Each empire has terrain cost presets that affect travel/speed; the simulation computes reachable cells and assigns ownership based on minimal travel cost.
 
-## Available Scripts
+## Features
+- Load plain-text map files from `public/resources/maps/`.
+- Configure per-terrain travel costs and terrain-change penalties per empire.
+- Dijkstra-like expansion per capital using a min-heap priority queue (`src/resources/mapLgorithm.ts`).
+- Select closest reachable cells (top-N) using a max-heap (`findNClosestCells`).
+- Visualize ownership and expansions on canvas layers (`src/contents/Map.tsx`, `src/style/Map.css`).
+- UI for map selection and empire configuration in `src/contents/`.
 
-In the project directory, you can run:
+## Map format
+- Plain text grid (.txt). Each character = terrain tile.
+- Typical tokens:
+  - W / R — water / river
+  - P — plain
+  - M — mountain
+  - F — forest
+  - D — desert
+  - I — ice
 
-### `npm start`
+## Key files
+- `src/resources/mapLgorithm.ts` — core pathfinding and selection (searchTer, findNClosestCells)
+- `src/contents/Map.tsx` — map rendering and overlays
+- `src/contents/SettingContext.tsx` — empire presets & settings provider
+- `src/contents/Menu*.tsx` — UI for maps and empires
+- `public/resources/maps/` — example map files
+- `src/style/Map.css` — canvas and map styling
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Quick start
+Start dev server
+```sh
+npm start
+```
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
 
-### `npm test`
+## How it works (brief)
+1. Place a capital for an empire in the map UI.
+2. The app runs `searchTer` using that empire's terrain cost presets to compute minimal travel cost to every cell.
+3. `findNClosestCells` (or an assignment routine) picks the N best cells to claim for that empire based on computed costs.
+4. The map overlay paints ownership and expansion fronts.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-### `npm run build`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Map format
+- Plain text grid (.txt). Each character = terrain tile.
+- Typical tokens:
+  - W / R — water / river
+  - P — plain
+  - M — mountain
+  - F — forest
+  - D — desert
+  - I — ice
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Key files
+- `src/resources/mapLgorithm.ts` — core pathfinding and selection (searchTer, findNClosestCells)
+- `src/contents/Map.tsx` — map rendering and overlays
+- `src/contents/SettingContext.tsx` — empire presets & settings provider
+- `src/contents/Menu*.tsx` — UI for maps and empires
+- `public/resources/maps/` — example map files
+- `src/style/Map.css` — canvas and map styling
