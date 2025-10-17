@@ -41,5 +41,6 @@ npm start
 3. `findNClosestCells` (or an assignment routine) picks the N best cells to claim for that empire based on computed costs.
 4. The map overlay paints ownership and expansion fronts.
 
-
-![Game Example](public\screenshots\demonstration_image.png)
+# Simulation
+Here it can be seen a pretty good simulation of how geographical position influences the empire's exapnsion
+![Game Example](public/screenshots/demonstration_image.png)
