@@ -42,21 +42,4 @@ npm start
 4. The map overlay paints ownership and expansion fronts.
 
 
-
-## Map format
-- Plain text grid (.txt). Each character = terrain tile.
-- Typical tokens:
-  - W / R — water / river
-  - P — plain
-  - M — mountain
-  - F — forest
-  - D — desert
-  - I — ice
-
-## Key files
-- `src/resources/mapLgorithm.ts` — core pathfinding and selection (searchTer, findNClosestCells)
-- `src/contents/Map.tsx` — map rendering and overlays
-- `src/contents/SettingContext.tsx` — empire presets & settings provider
-- `src/contents/Menu*.tsx` — UI for maps and empires
-- `public/resources/maps/` — example map files
-- `src/style/Map.css` — canvas and map styling
+![Game Example](public\screenshots\demonstration_image.png)
