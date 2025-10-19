@@ -2,7 +2,10 @@
 
 A React + TypeScript app that simulates territorial expansion of configurable "empires" over .txt maps. Each empire has terrain cost presets that affect travel/speed; the simulation computes reachable cells and assigns ownership based on minimal travel cost.
 
-For the project that also uses Rust compiled to WASM (Web Assembly) and implemented in the React files look into https://github.com/Dv1de29/Map_Simulation-Rust
+
+# The Rust usage in the project for optimization
+For the project that integrates Rust compiled to WebAssembly (WASM) within the React codebase, see https://github.com/Dv1de29/Map_Simulation-Rust
+
 This approach was chosen to optimize performance by offloading heavy map-related computations that would otherwise be slower in TypeScript, while also enabling parallelization of certain calculations for improved time efficiency. Rust was selected for its near-native execution performance and its robust safety guarantees, which help reduce development errors
 
 
